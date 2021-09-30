@@ -1,11 +1,11 @@
-package net.danielgolan.eldery_lib.client;
+package net.danielgolan.elderion.library.client;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
-public class Eldery_libClient implements ClientModInitializer {
+public class ElderyClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 

@@ -13,10 +13,10 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "net.danielgolan.eldery_lib.client.Eldery_libClient"
+      "net.danielgolan.elderion.library.client.ElderyClient"
     ],
     "main": [
-      "net.danielgolan.eldery_lib.Eldery_lib"
+      "net.danielgolan.elderion.library.Eldery"
     ]
   },
   "mixins": [
