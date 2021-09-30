@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "eldery_lib",
+  "version": "${version}",
+  "name": "Eldery Library",
+  "description": "A Library",
+  "authors": [
+    "DanielGolan"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/eldery_lib/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.danielgolan.eldery_lib.client.Eldery_libClient"
+    ],
+    "main": [
+      "net.danielgolan.eldery_lib.Eldery_lib"
+    ]
+  },
+  "mixins": [
+    "eldery_lib.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.7",
+    "fabric": "*",
+    "minecraft": "1.17.1"
+  }
+}
