@@ -72,7 +72,6 @@ public final class VariedBlock {
 
             Registry.register(Registry.BLOCK, identifier, block(variation));
             Registry.register(Registry.ITEM, identifier, item(variation));
-
         }
 
         return this;
