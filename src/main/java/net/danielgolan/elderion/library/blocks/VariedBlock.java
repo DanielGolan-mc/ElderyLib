@@ -7,6 +7,11 @@ import net.minecraft.block.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.DyeColor;
@@ -16,7 +21,9 @@ import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.ToIntFunction;
 
 /**
@@ -26,12 +33,14 @@ public final class VariedBlock {
     private final HashMap<BlockVariation, Block> blocks = new HashMap<>();
     private final HashMap<BlockVariation, BlockItem> items = new HashMap<>();
 
+    private final List<Recipe<?>> recipes = new ArrayList<>();
+
     private final ElderionIdentifier identifier;
 
     private VariedBlock(Builder builder, ElderionIdentifier identifier) {
         this.identifier = identifier;
 
-        Item.Settings settings = new Item.Settings().rarity(builder.rarity()).group(builder.type().GROUP);
+        Item.Settings settings = new Item.Settings().rarity(builder.rarity()).group(builder.type());
 
         blocks.put(BlockVariation.BLOCK, builder.generator().generate(builder));
         items.put(BlockVariation.BLOCK, new BlockItem(block(), settings));
@@ -41,6 +50,13 @@ public final class VariedBlock {
 
             blocks.put(variation, builder.generator().generateVariation(builder, block(), variation));
             items.put(variation, new BlockItem(block(variation), settings));
+
+            if (variation.RECIPE_RESULT > 0 && builder.recipesEnabled()) {
+                StonecuttingRecipe stonecuttingRecipe = new StonecuttingRecipe(identifier.toIdentifier(variation.SUFFIX),
+                        null, Ingredient.ofItems(item()), new ItemStack(item(variation),
+                        variation.RECIPE_RESULT));
+                recipes.add(stonecuttingRecipe);
+            }
         });
     }
 
@@ -56,6 +72,7 @@ public final class VariedBlock {
 
             Registry.register(Registry.BLOCK, identifier, block(variation));
             Registry.register(Registry.ITEM, identifier, item(variation));
+
         }
 
         return this;
@@ -133,9 +150,10 @@ public final class VariedBlock {
      */
     public static final class Builder extends FabricBlockSettings {
         private final HashMap<BlockVariation, Boolean> variations = new HashMap<>();
-        private BlockType type = BlockType.BUILDING;
+        private ItemGroup type = ItemGroup.BUILDING_BLOCKS;
         private Rarity rarity = Rarity.COMMON;
         private BlockGenerator generator = BlockGenerator.DEFAULT;
+        private boolean enableRecipes = true;
 
         protected Builder(Material material, MapColor color) {
             super(material, color);
@@ -169,7 +187,7 @@ public final class VariedBlock {
             return variations.get(variation);
         }
 
-        public Builder type(BlockType type) {
+        public Builder type(ItemGroup type) {
             this.type = type;
             return this;
         }
@@ -179,7 +197,7 @@ public final class VariedBlock {
             return this;
         }
 
-        public BlockType type() {
+        public ItemGroup type() {
             return type;
         }
 
@@ -345,6 +363,15 @@ public final class VariedBlock {
 
         public Builder breakByTool(Tag<Item> tag) {
             return this.breakByTool(tag, 0);
+        }
+
+        public boolean recipesEnabled() {
+            return enableRecipes;
+        }
+
+        public Builder recipesEnabled(boolean enableRecipes) {
+            this.enableRecipes = enableRecipes;
+            return this;
         }
     }
 }
