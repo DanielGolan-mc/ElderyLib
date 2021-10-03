@@ -13,7 +13,7 @@
     "sources": "https://github.com/DanielGolan-mc/ElderyLib",
     "discord": "https://discord.gg/9V8epgJWFC"
   },
-  "license": "MIT",
+  "license": "LGPL-2.1 License",
   "icon": "assets/eldery_lib/icon.png",
   "environment": "*",
   "entrypoints": {
