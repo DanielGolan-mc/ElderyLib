@@ -18,6 +18,7 @@ import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +42,6 @@ public final class VariedBlock {
         this.identifier = identifier;
 
         Item.Settings settings = new Item.Settings().rarity(builder.rarity()).group(builder.type());
-
         blocks.put(BlockVariation.BLOCK, builder.generator().generate(builder));
         items.put(BlockVariation.BLOCK, new BlockItem(block(), settings));
 
@@ -153,6 +153,7 @@ public final class VariedBlock {
         private Rarity rarity = Rarity.COMMON;
         private BlockGenerator generator = BlockGenerator.DEFAULT;
         private boolean enableRecipes = true;
+        private VoxelShape box = null;
 
         protected Builder(Material material, MapColor color) {
             super(material, color);
@@ -370,6 +371,15 @@ public final class VariedBlock {
 
         public Builder recipesEnabled(boolean enableRecipes) {
             this.enableRecipes = enableRecipes;
+            return this;
+        }
+
+        public VoxelShape boundingBox() {
+            return box;
+        }
+
+        public Builder boundingBox(VoxelShape box) {
+            this.box = box;
             return this;
         }
     }

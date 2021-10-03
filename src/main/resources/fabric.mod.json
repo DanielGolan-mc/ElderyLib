@@ -18,10 +18,10 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "net.danielgolan.elderion.library.client.ElderyClient"
+      "net.danielgolan.elderion.library.client.ElderlyClient"
     ],
     "main": [
-      "net.danielgolan.elderion.library.Eldery"
+      "net.danielgolan.elderion.library.Elderly"
     ]
   },
   "mixins": [

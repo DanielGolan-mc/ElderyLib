@@ -1,6 +1,9 @@
 package net.danielgolan.elderion.library.blocks;
 
 import net.minecraft.block.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.BlockView;
 
 public interface BlockGenerator {
     BlockGenerator DEFAULT = (settings, original, variation) -> switch (variation) {
@@ -12,10 +15,15 @@ public interface BlockGenerator {
         case FENCE_GATE -> new FenceGateBlock(settings);
     };
 
-    Block generateVariation(AbstractBlock.Settings settings, Block original, BlockVariation variation);
+    Block generateVariation(VariedBlock.Builder builder, Block original, BlockVariation variation);
 
-    default Block generate(AbstractBlock.Settings settings) {
-        return new Block(settings);
+    default Block generate(VariedBlock.Builder builder) {
+        return new Block(builder) {
+            @Override
+            public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+                return builder.boundingBox();
+            }
+        };
     }
 
     static StairsBlock generateStairs(Block original, AbstractBlock.Settings settings) {
