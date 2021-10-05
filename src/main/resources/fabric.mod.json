@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "elderly_lib",
-  "version": "${version}",
+  "version": "${mod_version}",
   "name": "Elderly Library",
   "description": "A Library Required by Elderion Studio and Catalyst Studios",
   "authors": [
