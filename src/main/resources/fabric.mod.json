@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "elderly_lib",
-  "version": "${mod_version}",
+  "version": "${version}",
   "name": "Elderly Library",
   "description": "A Library Required by Elderion Studio and Catalyst Studios",
   "authors": [
@@ -31,6 +31,9 @@
     "fabricloader": ">=0.11.7",
     "fabric": "*",
     "minecraft": "1.17.1"
+  },
+  "recommends": {
+    "modmenu": "*"
   },
   "custom": {
     "modmenu": {
