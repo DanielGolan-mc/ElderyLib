@@ -21,7 +21,8 @@ public interface BlockGenerator {
         return new Block(builder) {
             @Override
             public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-                return builder.boundingBox();
+                return builder.boundingBox() == null ? super.getOutlineShape(state, world, pos, context) :
+                        builder.boundingBox();
             }
         };
     }
