@@ -13,8 +13,11 @@ public record ElderionIdentifier(Author author, String path) {
     }
 
     public Identifier toIdentifier(String pathAddition) {
-        return isEmpty(author) ? new Identifier(author.modID(),path + pathAddition) :
-        new Identifier(author.modID(), author.name() + '/' + path + pathAddition);
+        if (pathAddition == null || pathAddition.equals(""))
+             return isEmpty(author) ? new Identifier(author.modID(), path + '_' + pathAddition) :
+                    new Identifier(author.modID(), author.name() + '/' + path + '_' + pathAddition);
+        else return isEmpty(author) ? new Identifier(author.modID(), path) :
+                new Identifier(author.modID(), author.name() + '/' + path);
     }
 
     private boolean isEmpty(Author a) {

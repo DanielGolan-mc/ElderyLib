@@ -12,7 +12,7 @@ public enum BlockVariation {
     public final int RECIPE_RESULT;
 
     BlockVariation(String suffix, int stone_cutter_result) {
-        SUFFIX = '_' + suffix;
+        SUFFIX = suffix;
         RECIPE_RESULT = stone_cutter_result;
     }
 
@@ -21,8 +21,7 @@ public enum BlockVariation {
     }
 
     BlockVariation() {
-        RECIPE_RESULT = 0;
-        SUFFIX = "";
+        this("", 0);
     }
 
 }
