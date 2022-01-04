@@ -42,6 +42,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.system.CallbackI;
 
 import java.util.concurrent.CompletableFuture;
@@ -111,7 +113,7 @@ public class FluidHandler extends FlowableFluid {
     private final Item bucketItem;
     private final Block block;
 
-    private FluidHandler(Builder builder, ElderionIdentifier identifier) {
+    private FluidHandler(@NotNull Builder builder, ElderionIdentifier identifier) {
         this.identifier = identifier;
 
         corrodes = builder.corrodes();
@@ -279,7 +281,8 @@ public class FluidHandler extends FlowableFluid {
         }
     }
 
-    public static Builder builder() {
+    @Contract(value = " -> new", pure = true)
+    public static @NotNull Builder builder() {
         return new Builder();
     }
     public static final class Builder {
