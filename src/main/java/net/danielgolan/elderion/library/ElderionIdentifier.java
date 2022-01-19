@@ -23,4 +23,9 @@ public record ElderionIdentifier(Author author, String path) {
     private boolean isEmpty(Author a) {
         return a == null || a.name() == null || a.name().equals("");
     }
+
+    @Override
+    public String toString() {
+        return toIdentifier().toString();
+    }
 }

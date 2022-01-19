@@ -1,5 +1,6 @@
 package net.danielgolan.elderion.library.blocks;
 
+import io.netty.buffer.Unpooled;
 import net.danielgolan.elderion.library.Author;
 import net.danielgolan.elderion.library.ElderionIdentifier;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -9,8 +10,10 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.tag.Tag;
@@ -38,7 +41,7 @@ public final class VariedBlock {
 
     private final ElderionIdentifier identifier;
 
-    private VariedBlock(Builder builder, ElderionIdentifier identifier) {
+    private VariedBlock(@NotNull Builder builder, ElderionIdentifier identifier) {
         this.identifier = identifier;
 
         Item.Settings settings = new Item.Settings().rarity(builder.rarity()).group(builder.type());
@@ -51,11 +54,21 @@ public final class VariedBlock {
             blocks.put(variation, builder.generator().generateVariation(builder, block(), variation));
             items.put(variation, new BlockItem(block(variation), settings));
 
-            if (variation.RECIPE_RESULT > 0 && builder.recipesEnabled()) {
+            if (builder.recipesEnabled() && variation.RECIPE_RESULT > 0) {
+                //creation of normal recipe
                 StonecuttingRecipe stonecuttingRecipe = new StonecuttingRecipe(identifier.toIdentifier(variation.SUFFIX),
-                        null, Ingredient.ofItems(item()), new ItemStack(item(variation),
+                        variation.SUFFIX, Ingredient.ofItems(item()), new ItemStack(item(variation),
                         variation.RECIPE_RESULT));
+
                 recipes.add(stonecuttingRecipe);
+
+                //creation of additional recipe
+                if (builder.revertRecipesEnabled() && variation.RECIPE_RESULT == 1) {
+                    StonecuttingRecipe revertRecipe = new StonecuttingRecipe(identifier.toIdentifier("revert" + variation.SUFFIX),
+                            identifier.toString(), Ingredient.ofItems(item(variation)), new ItemStack(item(), 1));
+
+                    recipes.add(revertRecipe);
+                }
             }
         });
     }
@@ -73,6 +86,11 @@ public final class VariedBlock {
             Registry.register(Registry.BLOCK, identifier, block(variation));
             Registry.register(Registry.ITEM, identifier, item(variation));
         }
+
+        recipes.forEach(recipe -> {
+            if (recipes instanceof StonecuttingRecipe stonecuttingRecipe)
+                RecipeSerializer.STONECUTTING.write(new PacketByteBuf(Unpooled.buffer()), stonecuttingRecipe);
+        });
 
         return this;
     }
@@ -140,7 +158,7 @@ public final class VariedBlock {
      * @return a new builder with default values of these settings
      */
     @Contract("_ -> new")
-    public static Builder of(VariedBlock block) {
+    public static @NotNull Builder of(@NotNull VariedBlock block) {
         return of(block.block());
     }
 
@@ -152,14 +170,14 @@ public final class VariedBlock {
         private ItemGroup type = ItemGroup.BUILDING_BLOCKS;
         private Rarity rarity = Rarity.COMMON;
         private BlockGenerator generator = BlockGenerator.DEFAULT;
-        private boolean enableRecipes = true;
+        private boolean enableRecipes = false, enableRevertRecipes = false;
         private VoxelShape box = null;
 
-        protected Builder(Material material, MapColor color) {
+        private Builder(Material material, MapColor color) {
             super(material, color);
         }
 
-        protected Builder(AbstractBlock.Settings settings) {
+        private Builder(AbstractBlock.Settings settings) {
             super(settings);
         }
 
@@ -167,7 +185,7 @@ public final class VariedBlock {
          * @param variations block variations to enable
          */
         @Contract("_ -> this")
-        public Builder enable(BlockVariation... variations) {
+        public Builder enable(BlockVariation @NotNull ... variations) {
             for (BlockVariation variation : variations)
                 this.variations.put(variation, true);
             return this;
@@ -177,7 +195,7 @@ public final class VariedBlock {
          * @param variations block variations to disable
          */
         @Contract("_ -> this")
-        public Builder disable(BlockVariation... variations) {
+        public Builder disable(BlockVariation @NotNull ... variations) {
             for (BlockVariation variation : variations)
                 this.variations.put(variation, false);
             return this;
@@ -205,11 +223,13 @@ public final class VariedBlock {
             return rarity;
         }
 
-        public VariedBlock build(ElderionIdentifier identifier) {
+        @Contract("_ -> new")
+        public @NotNull VariedBlock build(ElderionIdentifier identifier) {
             return new VariedBlock(this, identifier);
         }
 
-        public VariedBlock build(Author author, String path) {
+        @Contract("_, _ -> new")
+        public @NotNull VariedBlock build(Author author, String path) {
             return build(new ElderionIdentifier(author, path));
         }
 
@@ -342,7 +362,8 @@ public final class VariedBlock {
             return this;
         }
 
-        public Builder mapColor(DyeColor color) {
+        @Contract("_ -> this")
+        public Builder mapColor(@NotNull DyeColor color) {
             return this.mapColor(color.getMapColor());
         }
 
@@ -356,11 +377,13 @@ public final class VariedBlock {
             return this;
         }
 
+        @Deprecated(forRemoval = true)
         public Builder breakByTool(Tag<Item> tag, int miningLevel) {
             super.breakByTool(tag, miningLevel);
             return this;
         }
 
+        @Deprecated(forRemoval = true)
         public Builder breakByTool(Tag<Item> tag) {
             return this.breakByTool(tag, 0);
         }
@@ -369,8 +392,17 @@ public final class VariedBlock {
             return enableRecipes;
         }
 
+        public boolean revertRecipesEnabled() {
+            return enableRevertRecipes;
+        }
+
         public Builder recipesEnabled(boolean enableRecipes) {
+            return recipesEnabled(enableRecipes, true);
+        }
+
+        public Builder recipesEnabled(boolean enableRecipes, boolean enableRevertRecipes) {
             this.enableRecipes = enableRecipes;
+            this.enableRevertRecipes = enableRevertRecipes;
             return this;
         }
 
@@ -382,5 +414,7 @@ public final class VariedBlock {
             this.box = box;
             return this;
         }
+
+
     }
 }

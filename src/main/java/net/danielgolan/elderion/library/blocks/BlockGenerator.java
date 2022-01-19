@@ -4,6 +4,8 @@ import net.minecraft.block.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 public interface BlockGenerator {
     BlockGenerator DEFAULT = (settings, original, variation) -> switch (variation) {
@@ -27,11 +29,13 @@ public interface BlockGenerator {
         };
     }
 
-    static StairsBlock generateStairs(Block original, AbstractBlock.Settings settings) {
+    @Contract("_, _ -> new")
+    static @NotNull StairsBlock generateStairs(@NotNull Block original, AbstractBlock.Settings settings) {
         return new StairsGenerator(original.getDefaultState(), settings);
     }
 
-    static StairsBlock generateStairs(BlockState state, AbstractBlock.Settings settings) {
+    @Contract("_, _ -> new")
+    static @NotNull StairsBlock generateStairs(BlockState state, AbstractBlock.Settings settings) {
         return new StairsGenerator(state, settings);
     }
 
