@@ -1,50 +1,37 @@
 package net.danielgolan.elderion.library.blocks;
 
-import io.netty.buffer.Unpooled;
-import net.danielgolan.elderion.library.Author;
 import net.danielgolan.elderion.library.ElderionIdentifier;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.danielgolan.elderion.library.Elderly;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.block.*;
-import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.StonecuttingRecipe;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.tag.Tag;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.ToIntFunction;
 
 /**
  * A class used to generate multiple variations of a block
  */
-public final class VariedBlock {
+public final class VariedBlock extends BlockHandler<VariedBlock, Block, VariedBlock.Builder> implements Elderly.RecipeManager {
     private final HashMap<BlockVariation, Block> blocks = new HashMap<>();
     private final HashMap<BlockVariation, BlockItem> items = new HashMap<>();
 
     private final List<Recipe<?>> recipes = new ArrayList<>();
 
-    private final ElderionIdentifier identifier;
-
     private VariedBlock(@NotNull Builder builder, ElderionIdentifier identifier) {
-        this.identifier = identifier;
+        super(builder, identifier);
 
-        Item.Settings settings = new Item.Settings().rarity(builder.rarity()).group(builder.type());
+        FabricItemSettings settings = ItemSettingsOf(builder);
         blocks.put(BlockVariation.BLOCK, builder.generator().generate(builder));
         items.put(BlockVariation.BLOCK, new BlockItem(block(), settings));
 
@@ -87,10 +74,7 @@ public final class VariedBlock {
             Registry.register(Registry.ITEM, identifier, item(variation));
         }
 
-        recipes.forEach(recipe -> {
-            if (recipes instanceof StonecuttingRecipe stonecuttingRecipe)
-                RecipeSerializer.STONECUTTING.write(new PacketByteBuf(Unpooled.buffer()), stonecuttingRecipe);
-        });
+        Elderly.RecipeManager.addRecipes(recipes);
 
         return this;
     }
@@ -162,16 +146,10 @@ public final class VariedBlock {
         return of(block.block());
     }
 
-    /**
-     * Builder
-     */
-    public static final class Builder extends FabricBlockSettings {
+    public static final class Builder extends BlockHandler.Builder<VariedBlock, Block, Builder> {
         private final HashMap<BlockVariation, Boolean> variations = new HashMap<>();
-        private ItemGroup type = ItemGroup.BUILDING_BLOCKS;
-        private Rarity rarity = Rarity.COMMON;
         private BlockGenerator generator = BlockGenerator.DEFAULT;
         private boolean enableRecipes = false, enableRevertRecipes = false;
-        private VoxelShape box = null;
 
         private Builder(Material material, MapColor color) {
             super(material, color);
@@ -205,33 +183,11 @@ public final class VariedBlock {
             return variations.get(variation);
         }
 
-        public Builder type(ItemGroup type) {
-            this.type = type;
-            return this;
-        }
-
-        public Builder rarity(Rarity rarity) {
-            this.rarity = rarity;
-            return this;
-        }
-
-        public ItemGroup type() {
-            return type;
-        }
-
-        public Rarity rarity() {
-            return rarity;
-        }
-
         @Contract("_ -> new")
         public @NotNull VariedBlock build(ElderionIdentifier identifier) {
             return new VariedBlock(this, identifier);
         }
 
-        @Contract("_, _ -> new")
-        public @NotNull VariedBlock build(Author author, String path) {
-            return build(new ElderionIdentifier(author, path));
-        }
 
         public Builder generator(BlockGenerator generator) {
             this.generator = generator;
@@ -240,160 +196,6 @@ public final class VariedBlock {
 
         public BlockGenerator generator() {
             return generator;
-        }
-
-        public Builder noCollision() {
-            super.noCollision();
-            return this;
-        }
-
-        public Builder nonOpaque() {
-            super.nonOpaque();
-            return this;
-        }
-
-        public Builder slipperiness(float value) {
-            super.slipperiness(value);
-            return this;
-        }
-
-        public Builder velocityMultiplier(float velocityMultiplier) {
-            super.velocityMultiplier(velocityMultiplier);
-            return this;
-        }
-
-        public Builder jumpVelocityMultiplier(float jumpVelocityMultiplier) {
-            super.jumpVelocityMultiplier(jumpVelocityMultiplier);
-            return this;
-        }
-
-        public Builder sounds(BlockSoundGroup group) {
-            super.sounds(group);
-            return this;
-        }
-
-        public Builder luminance(ToIntFunction<BlockState> luminanceFunction) {
-            super.luminance(luminanceFunction);
-            return this;
-        }
-
-        public Builder strength(float hardness, float resistance) {
-            super.strength(hardness, resistance);
-            return this;
-        }
-
-        public Builder breakInstantly() {
-            super.breakInstantly();
-            return this;
-        }
-
-        public Builder strength(float strength) {
-            super.strength(strength);
-            return this;
-        }
-
-        public Builder ticksRandomly() {
-            super.ticksRandomly();
-            return this;
-        }
-
-        public Builder dynamicBounds() {
-            super.dynamicBounds();
-            return this;
-        }
-
-        public Builder air() {
-            super.air();
-            return this;
-        }
-
-        public Builder allowsSpawning(AbstractBlock.TypedContextPredicate<EntityType<?>> predicate) {
-            super.allowsSpawning(predicate);
-            return this;
-        }
-
-        public Builder solidBlock(AbstractBlock.ContextPredicate predicate) {
-            super.solidBlock(predicate);
-            return this;
-        }
-
-        public Builder suffocates(AbstractBlock.ContextPredicate predicate) {
-            super.suffocates(predicate);
-            return this;
-        }
-
-        public Builder blockVision(AbstractBlock.ContextPredicate predicate) {
-            super.blockVision(predicate);
-            return this;
-        }
-
-        public Builder postProcess(AbstractBlock.ContextPredicate predicate) {
-            super.postProcess(predicate);
-            return this;
-        }
-
-        public Builder emissiveLighting(AbstractBlock.ContextPredicate predicate) {
-            super.emissiveLighting(predicate);
-            return this;
-        }
-
-        public Builder luminance(int luminance) {
-            super.luminance(luminance);
-            return this;
-        }
-
-        public Builder hardness(float hardness) {
-            super.hardness(hardness);
-            return this;
-        }
-
-        public Builder resistance(float resistance) {
-            super.resistance(resistance);
-            return this;
-        }
-
-        public Builder requiresTool() {
-            super.requiresTool();
-            return this;
-        }
-
-        public Builder mapColor(MapColor color) {
-            super.mapColor(color);
-            return this;
-        }
-
-        @Contract("_ -> this")
-        public Builder mapColor(@NotNull DyeColor color) {
-            return this.mapColor(color.getMapColor());
-        }
-
-        public Builder collidable(boolean collidable) {
-            super.collidable(collidable);
-            return this;
-        }
-
-        public Builder breakByHand(boolean breakByHand) {
-            super.breakByHand(breakByHand);
-            return this;
-        }
-
-        @Deprecated(forRemoval = true)
-        public Builder breakByTool(Tag<Item> tag, int miningLevel) {
-            super.breakByTool(tag, miningLevel);
-            return this;
-        }
-
-        @Deprecated(forRemoval = true)
-        public Builder breakByTool(Tag<Item> tag) {
-            return this.breakByTool(tag, 0);
-        }
-
-        public boolean recipesEnabled() {
-            return enableRecipes;
-        }
-
-        public boolean revertRecipesEnabled() {
-            return enableRevertRecipes;
         }
 
         public Builder recipesEnabled(boolean enableRecipes) {
@@ -406,15 +208,17 @@ public final class VariedBlock {
             return this;
         }
 
-        public VoxelShape boundingBox() {
-            return box;
+        public boolean revertRecipesEnabled() {
+            return enableRevertRecipes;
         }
 
-        public Builder boundingBox(VoxelShape box) {
-            this.box = box;
+        public boolean recipesEnabled() {
+            return enableRecipes;
+        }
+
+        @Override
+        protected Builder getBuilderInstance() {
             return this;
         }
-
-
     }
 }
