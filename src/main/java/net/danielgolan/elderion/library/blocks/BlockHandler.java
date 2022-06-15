@@ -9,10 +9,8 @@ import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.tag.Tag;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
@@ -220,22 +218,6 @@ public abstract sealed class BlockHandler<T extends BlockHandler<T, B, E>, B ext
         public E collidable(boolean collidable) {
             super.collidable(collidable);
             return getBuilderInstance();
-        }
-
-        public E breakByHand(boolean breakByHand) {
-            super.breakByHand(breakByHand);
-            return getBuilderInstance();
-        }
-
-        @Deprecated(forRemoval = true)
-        public E breakByTool(Tag<Item> tag, int miningLevel) {
-            super.breakByTool(tag, miningLevel);
-            return getBuilderInstance();
-        }
-
-        @Deprecated(forRemoval = true)
-        public E breakByTool(Tag<Item> tag) {
-            return this.breakByTool(tag, 0);
         }
 
         public EquipmentSlotProvider equipmentSlot() {

@@ -2,26 +2,13 @@ package net.danielgolan.elderion.library.fluids;
 
 import net.danielgolan.elderion.library.Author;
 import net.danielgolan.elderion.library.ElderionIdentifier;
-import net.danielgolan.elderion.library.blocks.VariedBlock;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
-import net.fabricmc.fabric.api.tag.TagFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.data.server.FluidTagsProvider;
 import net.minecraft.fluid.FlowableFluid;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
@@ -29,40 +16,26 @@ import net.minecraft.item.BucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleType;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.state.property.Properties;
-import net.minecraft.tag.FluidTags;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.system.CallbackI;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 public class FluidHandler extends FlowableFluid {
     public static final ToIntFunction<WorldView> WATER_FLOW_SPEED = world -> 4;
-    public static final ToIntFunction<WorldView> LAVA_FLOW_SPEED = world -> world.getDimension().isUltrawarm() ? 4 : 2;
-    public static final ToIntFunction<WorldView> HONEY_FLOW_SPEED = world -> world.getDimension().isUltrawarm() ? 3 : 2;
-
+    public static final ToIntFunction<WorldView> LAVA_FLOW_SPEED = world -> world.getDimension().ultrawarm() ? 4 : 2;
     public static final ToIntFunction<WorldView> WATER_LEVEL_DECREASE = world -> 1;
-    public static final ToIntFunction<WorldView> LAVA_LEVEL_DECREASE = world -> world.getDimension().isUltrawarm() ? 1 : 2;
-    public static final ToIntFunction<WorldView> HONEY_LEVEL_DECREASE = world -> 3;
-
+    public static final ToIntFunction<WorldView> LAVA_LEVEL_DECREASE = world -> world.getDimension().ultrawarm() ? 1 : 2;
     private static final ToIntFunction<WorldView> WATER_TICK_RATE = world -> 5;
-    private static final ToIntFunction<WorldView> LAVA_TICK_RATE = world -> world.getDimension().isUltrawarm() ? 10 : 30;
-    private static final ToIntFunction<WorldView> HONEY_TICK_RATE = world -> 20;
+    private static final ToIntFunction<WorldView> LAVA_TICK_RATE = world -> world.getDimension().ultrawarm() ? 10 : 30;
 
     /**
      * When breaking a block inside this fluid, drops will not spawn if this equals to true.

@@ -33,13 +33,6 @@ processResources {
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version
-        /*
-        expand "minecraft_version": project.minecraft_version
-        expand "yarn_mappings": project.yarn_mappings
-        expand "loader_version": project.loader_version
-        expand "fabric_version": project.fabric_version
-
-         */
     }
 }
 

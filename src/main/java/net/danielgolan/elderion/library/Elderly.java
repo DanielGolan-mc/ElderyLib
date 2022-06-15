@@ -14,7 +14,7 @@ public class Elderly implements ModInitializer {
     public void onInitialize() {
     }
 
-    public sealed interface RecipeManager permits VariedBlock {
+    public interface RecipeManager {
         static void addRecipes(List<Recipe<?>> recipes){
             Elderly.recipes.add(recipes);
         }
